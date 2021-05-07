@@ -60,11 +60,15 @@
         <viewer
           :options="viewer_options"
           :images="output_images"
-          class="viewer"
           ref="viewer"
         >
           <template slot-scope="scope">
-            <img v-for="src in scope.images" :src="src" :key="src" />
+            <img
+              v-for="src in scope.images"
+              :src="src"
+              :key="src"
+              style="height: 200px;cursor: pointer;margin: 5px;display: inline-block;"
+            />
           </template>
         </viewer>
       </div>
@@ -77,15 +81,15 @@ import "viewerjs/dist/viewer.css";
 import Viewer from "v-viewer/src/component.vue";
 export default {
   components: {
-    Viewer,
+    Viewer
   },
   name: "PageIndex",
   methods: {
-    submit: function () {
+    submit: function() {
       if (this.gap_selected_idx == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the time gap",
+          message: "Please select the time gap"
         });
         return;
       }
@@ -93,7 +97,7 @@ export default {
       if (this.segment_selected_idx == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the segmentation",
+          message: "Please select the segmentation"
         });
         return;
       }
@@ -101,23 +105,23 @@ export default {
       if (this.pictures.length == 0) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the picture",
+          message: "Please select the picture"
         });
         return;
       }
       let send_obj = {
         gap_val: gap_val,
         seg_val: seg_val,
-        pictures: this.pictures,
+        pictures: this.pictures
       };
       console.log(send_obj);
       this.$q.notify({
         type: "positive",
-        message: `${JSON.stringify(send_obj)}`,
+        message: `${JSON.stringify(send_obj)}`
       });
       this.output_images = [
         "https://cdn.quasar.dev/img/mountains.jpg",
-        "https://d33wubrfki0l68.cloudfront.net/28e392e11daadef180e12e890014c81dec12bd0c/3738d/image-4.a4d08f7d.jpg",
+        "https://d33wubrfki0l68.cloudfront.net/28e392e11daadef180e12e890014c81dec12bd0c/3738d/image-4.a4d08f7d.jpg"
       ];
     },
     onRejected(rejectedEntries) {
@@ -126,13 +130,13 @@ export default {
       console.log(rejectedEntries);
       this.$q.notify({
         type: "negative",
-        message: `${rejectedEntries.length} file(s) did not pass validation constraints`,
+        message: `${rejectedEntries.length} file(s) did not pass validation constraints`
       });
     },
     onAdded(files) {
       this.pictures = [];
       this.gap_selected_idx = null;
-    },
+    }
   },
   watch: {
     gap_selected_idx(newVal) {
@@ -145,27 +149,27 @@ export default {
         this.segment_options.push(`${start} - ${end}`);
         start += gap_val;
       }
-    },
+    }
   },
   data() {
     return {
       picture_options: [
         {
           label: "STFT 2D",
-          value: "stft_2d",
+          value: "stft_2d"
         },
         {
           label: "STFT 3D",
-          value: "stft_3d",
+          value: "stft_3d"
         },
         {
           label: "waveletes 2D",
-          value: "waveletes_2d",
+          value: "waveletes_2d"
         },
         {
           label: "waveletes 3D",
-          value: "waveletes_3d",
-        },
+          value: "waveletes_3d"
+        }
       ],
       pictures: [],
       time_gap_options: [
@@ -193,29 +197,17 @@ export default {
         150,
         200,
         300,
-        600,
+        600
       ],
       gap_selected_idx: null,
       segment_options: [],
       segment_selected_idx: null,
       output_images: [],
       viewer_options: {
-        inline: false,
-        button: true,
-        navbar: true,
-        title: true,
         toolbar: false,
-        tooltip: true,
-        movable: true,
-        zoomable: true,
-        rotatable: true,
-        scalable: false,
-        transition: false,
-        fullscreen: true,
-        keyboard: false,
-        url: "data-source",
-      },
+        inline: false,
+      }
     };
-  },
+  }
 };
 </script>
