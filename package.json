@@ -6,7 +6,7 @@
   "author": "AndersonZhangyq <andersonzhangyq@gmail.com>",
   "private": true,
   "scripts": {
-    "start": "quasar ext add @quasar/qzoom;quasar dev",
+    "start": "quasar dev",
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "build": "quasar build",
@@ -15,7 +15,8 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "core-js": "^3.6.5",
-    "quasar": "^1.0.0"
+    "quasar": "^1.0.0",
+    "v-viewer": "^1.5.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

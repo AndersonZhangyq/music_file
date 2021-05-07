@@ -57,13 +57,9 @@
         <q-btn label="Submit" color="primary" @click="submit"></q-btn>
       </div>
       <div class="row q-col-gutter-xs" v-if="output_images.length > 0">
-        <div class="col-1" v-for="(image, index) in output_images" :key="index">
+        <div class="col-3" v-for="(image, index) in output_images" :key="index">
           <q-zoom background-color="blue-grey-1">
-            <img
-              src="https://cdn.quasar.dev/img/mountains.jpg"
-              alt="QZoom basic"
-              class="my-image"
-            />
+            <q-img src="https://cdn.quasar.dev/img/mountains.jpg" />
           </q-zoom>
         </div>
       </div>
@@ -72,14 +68,19 @@
 </template>
 
 <script>
+import "viewerjs/dist/viewer.css";
+import Viewer from "v-viewer/src/component.vue";
 export default {
+  components: {
+    Viewer
+  },
   name: "PageIndex",
   methods: {
-    submit: function () {
+    submit: function() {
       if (this.gap_selected_idx == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the time gap",
+          message: "Please select the time gap"
         });
         return;
       }
@@ -87,7 +88,7 @@ export default {
       if (this.segment_selected_idx == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the segmentation",
+          message: "Please select the segmentation"
         });
         return;
       }
@@ -95,19 +96,19 @@ export default {
       if (this.pictures.length == 0) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the picture",
+          message: "Please select the picture"
         });
         return;
       }
       let send_obj = {
         gap_val: gap_val,
         seg_val: seg_val,
-        pictures: this.pictures,
+        pictures: this.pictures
       };
       console.log(send_obj);
       this.$q.notify({
         type: "positive",
-        message: `${JSON.stringify(send_obj)}`,
+        message: `${JSON.stringify(send_obj)}`
       });
       this.output_images = [1];
     },
@@ -117,45 +118,46 @@ export default {
       console.log(rejectedEntries);
       this.$q.notify({
         type: "negative",
-        message: `${rejectedEntries.length} file(s) did not pass validation constraints`,
+        message: `${rejectedEntries.length} file(s) did not pass validation constraints`
       });
     },
     onAdded(files) {
       this.pictures = [];
       this.gap_selected_idx = null;
-    },
+    }
   },
   watch: {
     gap_selected_idx(newVal) {
       this.segment_options = ["ALL"];
       let start = 1;
       let gap_val = this.time_gap_options[newVal];
+      this.segment_selected_idx = null;
       while (start < 601) {
         let end = Math.min(600, start + gap_val - 1);
         this.segment_options.push(`${start} - ${end}`);
         start += gap_val;
       }
-    },
+    }
   },
   data() {
     return {
       picture_options: [
         {
           label: "STFT 2D",
-          value: "stft_2d",
+          value: "stft_2d"
         },
         {
           label: "STFT 3D",
-          value: "stft_3d",
+          value: "stft_3d"
         },
         {
           label: "waveletes 2D",
-          value: "waveletes_2d",
+          value: "waveletes_2d"
         },
         {
           label: "waveletes 3D",
-          value: "waveletes_3d",
-        },
+          value: "waveletes_3d"
+        }
       ],
       pictures: [],
       time_gap_options: [
@@ -183,13 +185,13 @@ export default {
         150,
         200,
         300,
-        600,
+        600
       ],
       gap_selected_idx: null,
       segment_options: [],
       segment_selected_idx: null,
-      output_images: [],
+      output_images: []
     };
-  },
+  }
 };
 </script>
