@@ -217,6 +217,7 @@ export default {
         transition: false,
         rotatable: false,
         transition: false,
+        navbar: false,
       },
     };
   },
