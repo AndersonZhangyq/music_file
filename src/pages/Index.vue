@@ -1,9 +1,7 @@
 <template>
   <q-page>
     <div class="q-pa-md">
-      <div class="row">
-        Please choose your file type
-      </div>
+      <div class="row">Please choose your file type</div>
       <div class="row">
         <q-uploader
           url="http://localhost:4444/upload"
@@ -27,7 +25,7 @@
           ></q-btn>
         </div>
       </div>
-      <div class="row" v-if="gap_selected_idx != null">
+      <div class="row q-pb-xs items-center" v-if="gap_selected_idx != null">
         Please choose the segment which you want to visualize:
       </div>
       <div class="row q-col-gutter-xs" v-if="gap_selected_idx != null">
@@ -45,9 +43,7 @@
           ></q-btn>
         </div>
       </div>
-      <div class="row">
-        Please choose the picture you want to output:
-      </div>
+      <div class="row">Please choose the picture you want to output:</div>
       <div class="row">
         <q-option-group
           v-model="pictures"
@@ -60,6 +56,17 @@
       <div class="row">
         <q-btn label="Submit" color="primary" @click="submit"></q-btn>
       </div>
+      <div class="row q-col-gutter-xs" v-if="output_images.length > 0">
+        <div class="col-1" v-for="(image, index) in output_images" :key="index">
+          <q-zoom background-color="blue-grey-1">
+            <img
+              src="https://cdn.quasar.dev/img/mountains.jpg"
+              alt="QZoom basic"
+              class="my-image"
+            />
+          </q-zoom>
+        </div>
+      </div>
     </div>
   </q-page>
 </template>
@@ -68,11 +75,11 @@
 export default {
   name: "PageIndex",
   methods: {
-    submit: function() {
+    submit: function () {
       if (this.gap_selected_idx == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the time gap"
+          message: "Please select the time gap",
         });
         return;
       }
@@ -80,7 +87,7 @@ export default {
       if (this.segment_selected_idx == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the segmentation"
+          message: "Please select the segmentation",
         });
         return;
       }
@@ -88,16 +95,21 @@ export default {
       if (this.pictures.length == 0) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the picture"
+          message: "Please select the picture",
         });
         return;
       }
       let send_obj = {
         gap_val: gap_val,
         seg_val: seg_val,
-        pictures: this.pictures
+        pictures: this.pictures,
       };
       console.log(send_obj);
+      this.$q.notify({
+        type: "positive",
+        message: `${JSON.stringify(send_obj)}`,
+      });
+      this.output_images = [1];
     },
     onRejected(rejectedEntries) {
       // Notify plugin needs to be installed
@@ -105,17 +117,17 @@ export default {
       console.log(rejectedEntries);
       this.$q.notify({
         type: "negative",
-        message: `${rejectedEntries.length} file(s) did not pass validation constraints`
+        message: `${rejectedEntries.length} file(s) did not pass validation constraints`,
       });
     },
     onAdded(files) {
       this.pictures = [];
       this.gap_selected_idx = null;
-    }
+    },
   },
   watch: {
     gap_selected_idx(newVal) {
-      this.segment_options = [];
+      this.segment_options = ["ALL"];
       let start = 1;
       let gap_val = this.time_gap_options[newVal];
       while (start < 601) {
@@ -123,27 +135,27 @@ export default {
         this.segment_options.push(`${start} - ${end}`);
         start += gap_val;
       }
-    }
+    },
   },
   data() {
     return {
       picture_options: [
         {
           label: "STFT 2D",
-          value: "stft_2d"
+          value: "stft_2d",
         },
         {
           label: "STFT 3D",
-          value: "stft_3d"
+          value: "stft_3d",
         },
         {
           label: "waveletes 2D",
-          value: "waveletes_2d"
+          value: "waveletes_2d",
         },
         {
           label: "waveletes 3D",
-          value: "waveletes_3d"
-        }
+          value: "waveletes_3d",
+        },
       ],
       pictures: [],
       time_gap_options: [
@@ -171,12 +183,13 @@ export default {
         150,
         200,
         300,
-        600
+        600,
       ],
       gap_selected_idx: null,
       segment_options: [],
-      segment_selected_idx: null
+      segment_selected_idx: null,
+      output_images: [],
     };
-  }
+  },
 };
 </script>
