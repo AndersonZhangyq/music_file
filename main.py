@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 from flask_cors import CORS
 import os
 
@@ -12,7 +12,7 @@ app = Flask(
 # This is necessary because QUploader uses an AJAX request
 # to send the file
 cors = CORS()
-cors.init_app(app, resource={r"/api/*": {"origins": "*"}})
+cors.init_app(app, resource={r"/apis/*": {"origins": "*"}})
 
 
 @app.route("/apis/upload", methods=["POST"])
@@ -22,7 +22,19 @@ def upload():
         print(f)
         f.save("./uploads/%s" % fname)
 
-    return "Okay!"
+    return "OKAY!"
+
+@app.route("/apis/submit", methods=["POST"])
+def submit():
+    return jsonify(
+        [
+            {"src": "https://cdn.quasar.dev/img/mountains.jpg", "alt": "mountain"},
+            {
+                "src": "https://d33wubrfki0l68.cloudfront.net/28e392e11daadef180e12e890014c81dec12bd0c/3738d/image-4.a4d08f7d.jpg",
+                "alt": "cat",
+            },
+        ]
+    )
 
 
 @app.route("/", methods=["GET"])

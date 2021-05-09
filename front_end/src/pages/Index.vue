@@ -117,18 +117,29 @@ export default {
         pictures: this.pictures,
       };
       console.log(send_obj);
+      fetch("/apis/submit", {
+        method: "POST",
+        body: JSON.stringify(send_obj),
+      })
+        .then(response => response.json())
+        .then((data) => {
+          // this.output_images = [
+          //   {
+          //     src: "https://cdn.quasar.dev/img/mountains.jpg",
+          //     alt: "mountain",
+          //   },
+          //   {
+          //     src:
+          //       "https://d33wubrfki0l68.cloudfront.net/28e392e11daadef180e12e890014c81dec12bd0c/3738d/image-4.a4d08f7d.jpg",
+          //     alt: "cat",
+          //   },
+          // ];
+          this.output_images = data;
+        });
       this.$q.notify({
         type: "positive",
         message: `${JSON.stringify(send_obj)}`,
       });
-      this.output_images = [
-        { src: "https://cdn.quasar.dev/img/mountains.jpg", alt: "mountain" },
-        {
-          src:
-            "https://d33wubrfki0l68.cloudfront.net/28e392e11daadef180e12e890014c81dec12bd0c/3738d/image-4.a4d08f7d.jpg",
-          alt: "cat",
-        },
-      ];
     },
     onRejected(rejectedEntries) {
       // Notify plugin needs to be installed
