@@ -7,6 +7,8 @@
 // https://v1.quasar.dev/quasar-cli/quasar-conf-js
 /* eslint-env node */
 const ESLintPlugin = require('eslint-webpack-plugin')
+const FileManagerPlugin = require('filemanager-webpack-plugin');
+const path = require('path')
 
 module.exports = function (/* ctx */) {
   return {
@@ -67,6 +69,26 @@ module.exports = function (/* ctx */) {
       chainWebpack (chain) {
         chain.plugin('eslint-webpack-plugin')
           .use(ESLintPlugin, [{ extensions: [ 'js', 'vue' ] }])
+        chain.plugin("filemanager-webpack-plugin")
+          .use(FileManagerPlugin, [{
+            events: {
+              onEnd: {
+                copy: [{
+                  source: path.resolve(__dirname, 'dist/spa/js/'),
+                  destination: path.resolve(__dirname, 'dist/spa/static/js'),
+                },{
+                  source: path.resolve(__dirname, 'dist/spa/css/'),
+                  destination: path.resolve(__dirname, 'dist/spa/static/css'),
+                },{
+                  source: path.resolve(__dirname, 'dist/spa/fonts/'),
+                  destination: path.resolve(__dirname, 'dist/spa/static/fonts'),
+                },{
+                  source: path.resolve(__dirname, 'dist/spa/icons/'),
+                  destination: path.resolve(__dirname, 'dist/spa/static/icons/'),
+                }]
+              },
+            },
+          }])
       },
     },
 

@@ -4,7 +4,7 @@
       <div class="row">Please choose your file type</div>
       <div class="row">
         <q-uploader
-          url="http://localhost:4444/upload"
+          url="apis/upload"
           label="WAV and MP3 file are accepted"
           accept=".wav, .mp3"
           @rejected="onRejected"
