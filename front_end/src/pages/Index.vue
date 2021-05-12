@@ -1,7 +1,7 @@
 <template>
   <q-page>
     <div class="q-pa-md">
-      <div class="row">Please choose your file type</div>
+      <div class="row text-subtitle1">Please choose your file type</div>
       <div class="row">
         <q-uploader
           url="apis/upload"
@@ -11,68 +11,70 @@
           @added="onAdded"
         />
       </div>
-      <div class="row">
-        Please choose the time gap which you want (in seconds):
-      </div>
-      <div class="row q-col-gutter-xs">
-        <div class="col-1" v-for="(gap, index) in time_gap_options" :key="gap">
-          <q-btn
-            class="full-width"
-            :label="gap"
-            :color="index == gap_selected_idx ? 'red' : 'white'"
-            :text-color="index == gap_selected_idx ? 'white' : 'black'"
-            @click="gap_selected_idx = index"
-          ></q-btn>
+      <div v-if="duration > 0">
+        <div class="row text-body1">
+          Your audio file is about <b>&nbsp;{{ duration }}&nbsp;</b> seconds
+          long
         </div>
-      </div>
-      <div class="row q-pb-xs items-center" v-if="gap_selected_idx != null">
-        Please choose the segment which you want to visualize:
-      </div>
-      <div class="row q-col-gutter-xs" v-if="gap_selected_idx != null">
-        <div
-          class="col-1"
-          v-for="(segment, index) in segment_options"
-          :key="segment"
-        >
-          <q-btn
-            class="full-width"
-            :label="segment"
-            :color="index == segment_selected_idx ? 'red' : 'white'"
-            :text-color="index == segment_selected_idx ? 'white' : 'black'"
-            @click="segment_selected_idx = index"
-          ></q-btn>
+        <div class="row">
+          <q-input
+            v-model="time_gap"
+            type="number"
+            lazy-rules
+            :rules="[
+              (val) => (val !== null && val !== '') || 'Please type time gap',
+              (val) => (val > 0) || 'The time gap should be positive',
+            ]"
+            style="min-width: 30em"
+            label="Please type the time gap you prefer to have"
+            suffix="seconds"
+          />
         </div>
-      </div>
-      <div class="row">Please choose the picture you want to output:</div>
-      <div class="row">
-        <q-option-group
-          v-model="pictures"
-          type="checkbox"
-          :options="picture_options"
-          color="primary"
-          inline
-        />
-      </div>
-      <div class="row">
-        <q-btn label="Submit" color="primary" @click="submit"></q-btn>
-      </div>
-      <div class="row q-pt-sm" v-if="output_images.length > 0">
-        <viewer :options="viewer_options" :images="output_images" ref="viewer">
-          <template slot-scope="scope">
-            <img
-              v-for="{ src, alt } in scope.images"
-              :src="src"
-              :key="src"
-              :alt="alt"
-              style="
-                height: 200px;
-                cursor: pointer;
-                margin: 5px;
-                display: inline-block;
-              "
-            />
-          </template>
-        </viewer>
+        <div class="row text-body1" v-if="num_intact > 0">
+          Your audio file will be cut into
+          <b>&nbsp;{{ num_intact }}&nbsp;</b> intact parts
+        </div>
+        <div class="row text-body1" v-if="num_non_intact > 0">
+          The rest non-intact part contains
+          <b>&nbsp;{{ num_non_intact }}&nbsp;</b> seconds
+        </div>
+        <div class="row text-subtitle1 q-pt-sm">
+          Please choose the picture you want to output:
+        </div>
+        <div class="row">
+          <q-option-group
+            v-model="pictures"
+            type="checkbox"
+            :options="picture_options"
+            color="primary"
+            inline
+          />
+        </div>
+        <div class="row">
+          <q-btn label="Submit" color="primary" @click="submit"></q-btn>
+        </div>
+        <div class="row q-pt-sm" v-if="output_images.length > 0">
+          <viewer
+            :options="viewer_options"
+            :images="output_images"
+            ref="viewer"
+          >
+            <template slot-scope="scope">
+              <img
+                v-for="{ src, alt } in scope.images"
+                :src="src"
+                :key="src"
+                :alt="alt"
+                style="
+                  height: 200px;
+                  cursor: pointer;
+                  margin: 5px;
+                  display: inline-block;
+                "
+              />
+            </template>
+          </viewer>
+        </div>
       </div>
     </div>
   </q-page>
@@ -88,22 +90,13 @@ export default {
   name: "PageIndex",
   methods: {
     submit: function () {
-      if (this.gap_selected_idx == null) {
+      if (this.time_gap == null) {
         this.$q.notify({
           type: "negative",
-          message: "Please select the time gap",
+          message: "Please type the time gap",
         });
         return;
       }
-      let gap_val = this.time_gap_options[this.gap_selected_idx];
-      if (this.segment_selected_idx == null) {
-        this.$q.notify({
-          type: "negative",
-          message: "Please select the segmentation",
-        });
-        return;
-      }
-      let seg_val = this.segment_options[this.segment_selected_idx];
       if (this.pictures.length == 0) {
         this.$q.notify({
           type: "negative",
@@ -112,8 +105,7 @@ export default {
         return;
       }
       let send_obj = {
-        gap_val: gap_val,
-        seg_val: seg_val,
+        gap_val: this.time_gap,
         pictures: this.pictures,
       };
       console.log(send_obj);
@@ -121,7 +113,7 @@ export default {
         method: "POST",
         body: JSON.stringify(send_obj),
       })
-        .then(response => response.json())
+        .then((response) => response.json())
         .then((data) => {
           // this.output_images = [
           //   {
@@ -151,21 +143,64 @@ export default {
       });
     },
     onAdded(files) {
-      this.pictures = [];
-      this.gap_selected_idx = null;
+      // Obtain the uploaded file, you can change the logic if you are working with multiupload
+      var file = files[0];
+
+      // Create instance of FileReader
+      var reader = new FileReader();
+
+      // When the file has been succesfully read
+      reader.onload = (event) => {
+        // Create an instance of AudioContext
+        var audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+
+        // Asynchronously decode audio file data contained in an ArrayBuffer.
+        audioContext.decodeAudioData(event.target.result, (buffer) => {
+          // Obtain the duration in seconds of the audio file (with milliseconds as well, a float value)
+          this.duration = parseInt(buffer.duration);
+
+          // example 12.3234 seconds
+          console.log(
+            "The duration of the song is of: " + this.duration + " seconds"
+          );
+          // Alternatively, just display the integer value with
+          // parseInt(duration)
+          // 12 seconds
+        });
+      };
+
+      // In case that the file couldn't be read
+      reader.onerror = function (event) {
+        console.error("An error ocurred reading the file: ", event);
+      };
+
+      // Read file as an ArrayBuffer, important !
+      reader.readAsArrayBuffer(file);
+
+      this.output_images = [];
+      this.duration = null;
+      this.time_gap = null;
     },
   },
-  watch: {
-    gap_selected_idx(newVal) {
-      this.segment_options = ["ALL"];
-      let start = 1;
-      let gap_val = this.time_gap_options[newVal];
-      this.segment_selected_idx = null;
-      while (start < 601) {
-        let end = Math.min(600, start + gap_val - 1);
-        this.segment_options.push(`${start} - ${end}`);
-        start += gap_val;
-      }
+  computed: {
+    num_intact: function () {
+      if (
+        this.duration === null ||
+        this.time_gap === null ||
+        this.time_gap <= 0
+      )
+        return 0;
+      return parseInt(this.duration / this.time_gap);
+    },
+    num_non_intact: function () {
+      if (
+        this.duration === null ||
+        this.time_gap === null ||
+        this.time_gap <= 0
+      )
+        return 0;
+      return this.duration % this.time_gap;
     },
   },
   data() {
@@ -188,37 +223,9 @@ export default {
           value: "waveletes_3d",
         },
       ],
+      duration: null,
+      time_gap: null,
       pictures: [],
-      time_gap_options: [
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-        8,
-        10,
-        12,
-        15,
-        20,
-        24,
-        25,
-        30,
-        40,
-        50,
-        60,
-        75,
-        100,
-        120,
-        150,
-        200,
-        300,
-        600,
-      ],
-      gap_selected_idx: null,
-      segment_options: [],
-      segment_selected_idx: null,
       output_images: [],
       viewer_options: {
         toolbar: false,
