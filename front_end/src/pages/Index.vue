@@ -30,7 +30,7 @@
             suffix="seconds"
           />
         </div>
-        <div class="row text-body1" v-if="num_intact > 0">
+        <div class="row text-body1" v-if="num_intact > 0 || num_non_intact > 0">
           Your audio file will be cut into
           <b>&nbsp;{{ num_intact }}&nbsp;</b> intact parts. The rest non-intact
           part contains <b>&nbsp;{{ num_non_intact }}&nbsp;</b> seconds
@@ -119,6 +119,7 @@ export default {
         pictures: this.pictures,
       };
       console.log(send_obj);
+      this.output_images = [];
       this.image_loading = true;
       fetch("apis/submit", {
         method: "POST",
