@@ -12,7 +12,7 @@
         />
       </div>
       <div v-if="duration > 0">
-        <div class="row text-body1">
+        <div class="row q-pt-sm text-body1">
           Your audio file is about <b>&nbsp;{{ duration }}&nbsp;</b> seconds
           long
         </div>
@@ -23,7 +23,7 @@
             lazy-rules
             :rules="[
               (val) => (val !== null && val !== '') || 'Please type time gap',
-              (val) => (val > 0) || 'The time gap should be positive',
+              (val) => val > 0 || 'The time gap should be positive',
             ]"
             style="min-width: 30em"
             label="Please type the time gap you prefer to have"
@@ -32,11 +32,8 @@
         </div>
         <div class="row text-body1" v-if="num_intact > 0">
           Your audio file will be cut into
-          <b>&nbsp;{{ num_intact }}&nbsp;</b> intact parts
-        </div>
-        <div class="row text-body1" v-if="num_non_intact > 0">
-          The rest non-intact part contains
-          <b>&nbsp;{{ num_non_intact }}&nbsp;</b> seconds
+          <b>&nbsp;{{ num_intact }}&nbsp;</b> intact parts. The rest non-intact
+          part contains <b>&nbsp;{{ num_non_intact }}&nbsp;</b> seconds
         </div>
         <div class="row text-subtitle1 q-pt-sm">
           Please choose the picture you want to output:
@@ -53,25 +50,38 @@
         <div class="row">
           <q-btn label="Submit" color="primary" @click="submit"></q-btn>
         </div>
-        <div class="row q-pt-sm" v-if="output_images.length > 0">
+        <div
+          :class="{
+            row: true,
+            'q-pt-sm': true,
+            'justify-center': image_loading,
+          }"
+        >
+          <q-spinner-hourglass color="purple" size="4em" v-if="image_loading" />
           <viewer
             :options="viewer_options"
             :images="output_images"
             ref="viewer"
+            v-if="output_images.length > 0"
           >
             <template slot-scope="scope">
-              <img
+              <div
                 v-for="{ src, alt } in scope.images"
-                :src="src"
                 :key="src"
-                :alt="alt"
-                style="
-                  height: 200px;
-                  cursor: pointer;
-                  margin: 5px;
-                  display: inline-block;
-                "
-              />
+                style="display: inline-block"
+              >
+                <img
+                  :src="src"
+                  :alt="alt"
+                  style="
+                    height: 200px;
+                    cursor: pointer;
+                    margin: 5px;
+                    display: inline-block;
+                  "
+                />
+                <div class="text-subtitle1 text-center">{{ alt }}</div>
+              </div>
             </template>
           </viewer>
         </div>
@@ -109,7 +119,8 @@ export default {
         pictures: this.pictures,
       };
       console.log(send_obj);
-      fetch("/apis/submit", {
+      this.image_loading = true;
+      fetch("apis/submit", {
         method: "POST",
         body: JSON.stringify(send_obj),
       })
@@ -127,6 +138,14 @@ export default {
           //   },
           // ];
           this.output_images = data;
+          this.image_loading = false;
+        })
+        .catch(() => {
+          this.$q.notify({
+            type: "negative",
+            message: "Failed to load images",
+          });
+          this.image_loading = false;
         });
       this.$q.notify({
         type: "positive",
@@ -227,10 +246,10 @@ export default {
       time_gap: null,
       pictures: [],
       output_images: [],
+      image_loading: false,
       viewer_options: {
         toolbar: false,
         inline: false,
-        movable: false,
         title: [1, (image, imageData) => `${image.alt}`],
         transition: false,
         rotatable: false,
