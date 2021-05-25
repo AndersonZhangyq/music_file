@@ -12,10 +12,60 @@
         />
       </div>
       <div v-if="duration > 0">
-        <div class="row q-pt-sm text-body1">
+        <div class="row q-pt-sm text-body2">
           Your audio file is about <b>&nbsp;{{ duration }}&nbsp;</b> seconds
           long
         </div>
+        <div class="row text-subtitle1 q-pt-sm">
+          Which part you prefer to analysis?
+        </div>
+        <div class="row q-pt-sm">
+          <q-list dense>
+            <q-item>
+              <q-item-section>
+                <div class="row items-center">
+                  <q-radio v-model="analyze_type" val="full" />
+                  <q-item-label>All file</q-item-label>
+                </div>
+              </q-item-section>
+            </q-item>
+            <q-item>
+              <q-item-section>
+                <div class="row items-start">
+                  <q-radio v-model="analyze_type" val="part" />
+                  <q-item-label
+                    >From
+                    <q-input
+                      input-class="text-center"
+                      v-model="audio_start"
+                      dense
+                      class="inline-block"
+                      style="max-width: 5em"
+                      type="number"
+                      :rules="[(val) => val > 0 || (this.audio_start = 1)]"
+                    />
+                    second to
+                    <q-input
+                      v-model="audio_end"
+                      input-class="text-center"
+                      dense
+                      class="inline-block"
+                      style="max-width: 5em"
+                      type="number"
+                      :rules="[
+                        (val) =>
+                          val <= this.duration || (this.audio_end = duration),
+                      ]"
+                    />
+                    second. (Please do not exceed
+                    <b>{{ this.duration }}</b> seconds)</q-item-label
+                  >
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
         <div class="row">
           <q-input
             v-model="time_gap"
@@ -114,9 +164,15 @@ export default {
         });
         return;
       }
+      if (this.audio_end == "full") {
+        this.audio_start = 1;
+        this.audio_end = this.duration;
+      }
       let send_obj = {
         gap_val: this.time_gap,
         pictures: this.pictures,
+        start: this.audio_start,
+        end: this.audio_end,
       };
       console.log(send_obj);
       this.output_images = [];
@@ -179,6 +235,8 @@ export default {
         audioContext.decodeAudioData(event.target.result, (buffer) => {
           // Obtain the duration in seconds of the audio file (with milliseconds as well, a float value)
           this.duration = parseInt(buffer.duration);
+          this.audio_start = 1;
+          this.audio_end = this.duration;
 
           // example 12.3234 seconds
           console.log(
@@ -201,6 +259,9 @@ export default {
       this.output_images = [];
       this.duration = null;
       this.time_gap = null;
+      this.audio_start = null;
+      this.audio_end = null;
+      this.analyze_type = "full";
     },
   },
   computed: {
@@ -211,7 +272,7 @@ export default {
         this.time_gap <= 0
       )
         return 0;
-      return parseInt(this.duration / this.time_gap);
+      return parseInt(this.selected_duration / this.time_gap);
     },
     num_non_intact: function () {
       if (
@@ -220,7 +281,11 @@ export default {
         this.time_gap <= 0
       )
         return 0;
-      return this.duration % this.time_gap;
+      return this.selected_duration % this.time_gap;
+    },
+    selected_duration: function () {
+      if (this.audio_end === null || this.audio_end === null) return 0;
+      return this.audio_end - this.audio_start + 1;
     },
   },
   data() {
@@ -243,7 +308,10 @@ export default {
           value: "waveletes_3d",
         },
       ],
+      audio_start: null,
+      audio_end: null,
       duration: null,
+      analyze_type: "full",
       time_gap: null,
       pictures: [],
       output_images: [],
