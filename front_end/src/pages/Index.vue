@@ -25,7 +25,7 @@
               <q-item-section>
                 <div class="row items-center">
                   <q-radio v-model="analyze_type" val="full" />
-                  <q-item-label>All file</q-item-label>
+                  <q-item-label>Whole file</q-item-label>
                 </div>
               </q-item-section>
             </q-item>
